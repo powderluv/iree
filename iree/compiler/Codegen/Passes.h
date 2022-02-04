@@ -284,6 +284,9 @@ LogicalResult verifyGPUMatmulTensorCorePipeline(
     ArrayRef<int64_t> workgroupSize);
 void addGPUMatmulTensorCorePassPipeline(OpPassManager &pm);
 
+// Lowering to enable Warp reduction.
+void addGPUWarpLevelReductionPassPipeline(OpPassManager &pm);
+
 /// Simple lowering only distributute linalg ops on blocks and threads. This
 /// will result in scalar operations. Expects pass manager to be a module-level
 /// pass manager.
@@ -332,6 +335,11 @@ std::unique_ptr<OperationPass<FuncOp>> createLLVMGPUMultiBuffering(
 
 /// Converts vector ops to gpu dialect.
 std::unique_ptr<OperationPass<FuncOp>> createLLVMGPUVectorToGPU();
+
+std::unique_ptr<OperationPass<FuncOp>> createConvertVectorReductionToGPUPass();
+
+std::unique_ptr<OperationPass<FuncOp>>
+createLLVMGPUReductionVectorizationPass();
 
 //------------------------------------------------------------------------------
 // SPIR-V Passes
