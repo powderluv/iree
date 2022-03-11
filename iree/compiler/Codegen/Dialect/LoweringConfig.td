@@ -31,19 +31,19 @@ def LLVMGPU_MatmulSimt
 def LLVMGPU_MatmulTensorCore
     : I32EnumAttrCase<"LLVMGPUMatmulTensorCore", 8>;
 def LLVMGPU_WarpLevelReduction
-    : StrEnumAttrCase<"LLVMGPUWarpLevelReduction">;
+    : I32EnumAttrCase<"LLVMGPUWarpLevelReduction", 9>;
 
 def SPIRV_Distribute
-    : I32EnumAttrCase<"SPIRVDistribute", 9>;
+    : I32EnumAttrCase<"SPIRVDistribute", 10>;
 def SPIRV_DistributeCopy
-    : I32EnumAttrCase<"SPIRVDistributeCopy", 10>;
+    : I32EnumAttrCase<"SPIRVDistributeCopy", 11>;
 def SPIRV_Vectorize
-    : I32EnumAttrCase<"SPIRVVectorize", 11>;
+    : I32EnumAttrCase<"SPIRVVectorize", 12>;
 def SPIRV_VectorizeToCooperativeOps
-    : I32EnumAttrCase<"SPIRVVectorizeToCooperativeOps", 12>;
+    : I32EnumAttrCase<"SPIRVVectorizeToCooperativeOps", 13>;
 
 def None
-    : I32EnumAttrCase<"None", 13>;
+    : I32EnumAttrCase<"None", 14>;
 
 // EnumAttrCase for all known lowerings for ops within dispatch region
 // to scalar/native-vector code.

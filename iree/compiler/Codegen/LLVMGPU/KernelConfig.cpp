@@ -224,7 +224,8 @@ static LogicalResult setReductionConfig(FuncOp entryPoint,
   }
   // if (failed(vectorizeStaticLinalgOpPrecondition(op))) return failure();
   // Only support cases where we can distribute the reduction on a full warp.
-  ArrayRef<int64_t> inputShape = getUntiledShape(op.getInputOperand(0)->get());
+  ArrayRef<int64_t> inputShape =
+      op.getInputOperand(0)->get().getType().cast<ShapedType>().getShape();
   if (inputShape.back() % cudaWarpSize != 0) return failure();
 
   std::array<int64_t, 3> workgroupSize = {2 * cudaWarpSize, 1, 1};
@@ -253,7 +254,7 @@ static LogicalResult setReductionConfig(FuncOp entryPoint,
   TileSizesListType tileSizes;
   tileSizes.emplace_back(std::move(workgroupTileSizes));  // Workgroup level
   return setOpConfigAndEntryPointFnTranslation(
-      entryPoint, op, tileSizes, /*nativeVectorSize=*/ArrayRef<int64_t>{},
+      entryPoint, op, tileSizes,
       IREE::Codegen::DispatchLoweringPassPipeline::LLVMGPUWarpLevelReduction,
       workgroupSize);
   return success();
