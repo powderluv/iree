@@ -438,10 +438,10 @@ static LogicalResult setRootConfig(FuncOp entryPointFn, Operation *computeOp) {
       return setContractConfig(entryPointFn, linalgOp);
     }
   }
-  if (auto genericOp = dyn_cast<linalg::GenericOp>(computeOp)) {
+  /*if (auto genericOp = dyn_cast<linalg::GenericOp>(computeOp)) {
     if (succeeded(setReductionConfig(entryPointFn, genericOp)))
       return success();
-  }
+  }*/
   if (auto fftOp = dyn_cast<IREE::LinalgExt::FftOp>(computeOp)) {
     return setFftConfig(entryPointFn, fftOp);
   }
