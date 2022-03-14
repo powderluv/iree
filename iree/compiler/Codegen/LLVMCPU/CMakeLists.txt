@@ -28,6 +28,8 @@ iree_cc_library(
   DEPS
     IREELinalgExtDialect
     IREELinalgExtPasses
+    IREELinalgTransformDialect
+    IREELinalgTransformDialectTransforms
     LLVMSupport
     MLIRAffineToStandard
     MLIRAnalysis

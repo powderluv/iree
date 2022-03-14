@@ -19,14 +19,15 @@
 namespace mlir {
 namespace linalg {
 
-/// Find all operations in `module` that are matched by the specified PDL
-/// pattern, which is also located in `module`.
-FailureOr<SmallVector<Operation *>> findMatchingOps(Operation *op,
+/// Find all operations in `symbolTableOp` that are matched by the specified PDL
+/// `matchOp`, which is located in the same parent ModuleOp as `matchOp`.
+FailureOr<SmallVector<Operation *>> findMatchingOps(transform::MatchOp matchOp,
                                                     SymbolRefAttr pattern,
-                                                    ModuleOp module);
+                                                    Operation *containerOp);
+
 inline FailureOr<SmallVector<Operation *>> findMatchingOps(
-    transform::MatchOp op, ModuleOp module) {
-  return findMatchingOps(op, op.targetMatcher(), module);
+    transform::MatchOp matchOp, Operation *containerOp) {
+  return findMatchingOps(matchOp, matchOp.targetMatcher(), containerOp);
 }
 
 }  // namespace linalg

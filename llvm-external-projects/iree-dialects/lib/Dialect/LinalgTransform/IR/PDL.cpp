@@ -293,12 +293,14 @@ static LogicalResult isDimDynamic(PDLValue value, ArrayAttr constantParams,
   return success(shapedType && shapedType.isDynamicDim(dim));
 }
 
-FailureOr<SmallVector<Operation *>> findMatchingOps(Operation *op,
+FailureOr<SmallVector<Operation *>> findMatchingOps(transform::MatchOp matchOp,
                                                     SymbolRefAttr pattern,
-                                                    ModuleOp module) {
-  auto patternOp = module.lookupSymbol<pdl::PatternOp>(pattern);
+                                                    Operation *containerOp) {
+  auto moduleOp = matchOp->getParentOfType<ModuleOp>();
+  if (!moduleOp) return {moduleOp->emitError("no parent module op")};
+  auto patternOp = moduleOp.lookupSymbol<pdl::PatternOp>(pattern);
   if (!patternOp)
-    return {op->emitError("could not find a pattern named: ") << pattern};
+    return {moduleOp->emitError("could not find a pattern named: ") << pattern};
 
   // Clone the pattern operation into the temporary module used by the driver
   // as it might be referenced multiple times.
@@ -316,7 +318,7 @@ FailureOr<SmallVector<Operation *>> findMatchingOps(Operation *op,
                                     noOpRewriter);
 
   RewritePatternSet patterns(std::move(pdlModule));
-  return getMatchingOps(module, std::move(patterns));
+  return getMatchingOps(containerOp, std::move(patterns));
 }
 
 }  // namespace linalg

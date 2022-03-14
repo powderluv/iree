@@ -4,6 +4,7 @@
 // See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include "iree-dialects/Dialect/LinalgTransform/LinalgTransformOps.h"
 #include "iree/compiler/Codegen/Dialect/IREECodegenDialect.h"
 #include "iree/compiler/Codegen/LLVMCPU/KernelDispatch.h"
 #include "iree/compiler/Codegen/PassDetail.h"
@@ -11,6 +12,8 @@
 #include "iree/compiler/Dialect/HAL/IR/HALDialect.h"
 #include "iree/compiler/Dialect/HAL/IR/HALOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/Dialect/PDL/IR/PDL.h"
+#include "mlir/Dialect/PDLInterp/IR/PDLInterp.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Pass/PassRegistry.h"
@@ -33,9 +36,17 @@ class LLVMCPULowerExecutableTargetPass
   LLVMCPULowerExecutableTargetPass(
       const LLVMCPULowerExecutableTargetPass &pass) {}
   void getDependentDialects(DialectRegistry &registry) const override {
-    registry.insert<IREE::Codegen::IREECodegenDialect, IREE::HAL::HALDialect,
-                    linalg::LinalgDialect, LLVM::LLVMDialect, scf::SCFDialect,
+    // clang-format off
+    registry.insert<IREE::Codegen::IREECodegenDialect, 
+                    IREE::HAL::HALDialect,
+                    linalg::LinalgDialect, 
+                    linalg::transform::LinalgTransformDialect,
+                    LLVM::LLVMDialect, 
+                    pdl::PDLDialect,
+                    pdl_interp::PDLInterpDialect,
+                    scf::SCFDialect,
                     vector::VectorDialect>();
+    // clang-format on
   }
 
   void runOnOperation() override;

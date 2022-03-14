@@ -8,6 +8,7 @@
 
 #include "iree-dialects/Dialect/LinalgExt/IR/TiledOpInterface.h"
 #include "iree-dialects/Dialect/LinalgExt/Passes/Passes.h"
+#include "iree-dialects/Dialect/LinalgTransform/Passes.h"
 #include "iree/compiler/Codegen/LLVMCPU/KernelDispatch.h"
 #include "iree/compiler/Codegen/PassDetail.h"
 #include "iree/compiler/Codegen/Sandbox/Passes.h"
@@ -360,6 +361,10 @@ void addCPUDefaultPassPipeline(OpPassManager &passManager) {
 void addSandboxCodegenPasses(OpPassManager &passManager) {
   // Sets the number of workgroups to be {1, 1, 1} for now.
   passManager.addPass(createSetNumWorkgroupsPass());
+
+  // Give control to the linalg_transform dialect.
+  passManager.addPass(createLinalgTransformInterpreterPass());
+  passManager.addPass(createDropScheduleFromModulePass());
 
   OpPassManager &modulePM = passManager.nest<ModuleOp>();
   // Bufferize the dispatch.
