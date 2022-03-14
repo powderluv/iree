@@ -130,6 +130,7 @@ void addGPUMatmulTensorCorePassPipeline(OpPassManager &pm) {
 }
 
 void addGPUWarpLevelReductionPassPipeline(OpPassManager &pm) {
+  tileAndBufferize(pm);
   //===--------------------------------------------------------------------===//
   // Initial clean up.
   //===--------------------------------------------------------------------===//
@@ -139,6 +140,9 @@ void addGPUWarpLevelReductionPassPipeline(OpPassManager &pm) {
   // Distribute linalg onto warps within the workgroup.
   pm.addNestedPass<FuncOp>(
       createLLVMGPUTileAndDistribute(/*distributeToWarp=*/true));
+  if (pipelineDepth > 1)
+    pm.addNestedPass<FuncOp>(createLLVMGPUMultiBuffering(pipelineDepth));
+  pm.addNestedPass<FuncOp>(createMemrefCopyToLinalgPass());
   pm.addPass(createCanonicalizerPass());
   pm.addPass(createCSEPass());
 

@@ -216,12 +216,16 @@ static LogicalResult setReductionConfig(FuncOp entryPoint,
     return failure();
   // Transpose not supported yet.
   for (unsigned i = 0; i < op.getNumInputs(); i++) {
-    if (!op.indexing_maps()[i]
-             .cast<AffineMapAttr>()
-             .getValue()
-             .isMinorIdentity())
-      return failure();
+    AffineMap map = op.indexing_maps()[i].cast<AffineMapAttr>().getValue();
+    // single dim result cannot be a transpose
+    // TODO (nirvedhmeshram) this check needs to be relaxed more, perhaps check
+    // that the result dims are in increasing order for transpose check as not
+    // being minor identity map is not same as being a transpose
+    // single result cannot be a tranpose
+    if (map.getNumResults() == 1) continue;
+    if (!map.isMinorIdentity()) return failure();
   }
+
   // if (failed(vectorizeStaticLinalgOpPrecondition(op))) return failure();
   // Only support cases where we can distribute the reduction on a full warp.
   ArrayRef<int64_t> inputShape =
@@ -438,10 +442,10 @@ static LogicalResult setRootConfig(FuncOp entryPointFn, Operation *computeOp) {
       return setContractConfig(entryPointFn, linalgOp);
     }
   }
-  /*if (auto genericOp = dyn_cast<linalg::GenericOp>(computeOp)) {
+  if (auto genericOp = dyn_cast<linalg::GenericOp>(computeOp)) {
     if (succeeded(setReductionConfig(entryPointFn, genericOp)))
       return success();
-  }*/
+  }
   if (auto fftOp = dyn_cast<IREE::LinalgExt::FftOp>(computeOp)) {
     return setFftConfig(entryPointFn, fftOp);
   }
