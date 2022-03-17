@@ -362,7 +362,7 @@ struct LinearizeTransferReadIndices final
   LogicalResult matchAndRewrite(
       vector::TransferReadOp transferReadOp, OpAdaptor adaptor,
       ConversionPatternRewriter &rewriter) const override {
-    if (!transferReadOp.permutation_map().isMinorIdentity()) {
+    if (!transferReadOp.permutation_map().isProjectedPermutation()) {
       return rewriter.notifyMatchFailure(
           transferReadOp, "cannot convert op with non-minor identity map");
     }
@@ -394,7 +394,7 @@ struct LinearizeTransferWriteIndices final
   LogicalResult matchAndRewrite(
       vector::TransferWriteOp transferWriteOp, OpAdaptor adaptor,
       ConversionPatternRewriter &rewriter) const override {
-    if (!transferWriteOp.permutation_map().isMinorIdentity()) {
+    if (!transferWriteOp.permutation_map().isProjectedPermutation()) {
       return rewriter.notifyMatchFailure(
           transferWriteOp, "cannot convert op with non-minor identity map");
     }

@@ -344,3 +344,26 @@ func @load_store_rank_one_static_size_subspan_with_offset(%offset : index, %i: i
 //      CHECK:   %[[V:.+]] = memref.load %[[SPAN0]][%[[I0]]] : memref<?xf32>
 //      CHECK:   %[[I1:.+]] = affine.apply #[[MAP]]()[%[[I]], %[[OFFSET]]]
 //      CHECK:   memref.store %[[V]], %[[SPAN1]][%[[I1]]] : memref<?xf32>
+
+// -----
+
+func @projected_permutation_map(%arg0 : index, %arg1 : index)
+{
+  %c0 = arith.constant 0 : index
+  %cst = arith.constant 0.0 : f32
+  %read = hal.interface.binding.subspan set(0) binding(0) type(storage_buffer) : memref<1x130x130x1xf32>
+  %subspan = hal.interface.binding.subspan set(0) binding(1) type(storage_buffer) : memref<1x130x130x1xf32>
+  %vec = vector.transfer_read %read[%c0, %arg0, %arg1, %c0], %cst {in_bounds = [true], permutation_map = affine_map<(d0, d1, d2, d3) -> (d2)>} : memref<1x130x130x1xf32>, vector<4xf32>
+  vector.transfer_write %vec, %subspan[%c0, %arg0, %arg1, %c0] {in_bounds = [true], permutation_map = affine_map<(d0, d1, d2, d3) -> (d2)>} : vector<4xf32>, memref<1x130x130x1xf32>
+  return
+}
+//  CHECK-DAG: #[[MAP:.+]] = affine_map<()[s0, s1] -> (s0 * 130 + s1)>
+//      CHECK: func @projected_permutation_map(
+// CHECK-SAME:     %[[ARG0:[a-zA-Z0-9]+]]: index
+// CHECK-SAME:     %[[ARG1:.+]]: index
+//  CHECK-DAG:   %[[SRC:.+]] = hal.interface.binding.subspan set(0) binding(0)
+//      CHECK:   %[[DEST:.+]] = hal.interface.binding.subspan set(0) binding(1)
+//      CHECK:   %[[INDEX:.+]] = affine.apply #[[MAP]]()[%[[ARG0]], %[[ARG1]]]
+//      CHECK:   %[[VECT:.+]] = vector.transfer_read %[[SRC]][%[[INDEX]]]
+//      CHECK:   %[[INDEX:.+]] = affine.apply #[[MAP]]()[%[[ARG0]], %[[ARG1]]]
+//      CHECK:   vector.transfer_write %[[VECT]], %[[DEST]][%[[INDEX]]]
